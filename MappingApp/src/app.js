@@ -39,11 +39,20 @@ var feature = new ol.Feature({
 });
 feature.setId('LuckemeyerStrasse'); //giving feature an id
 feature.setStyle(sequareStyle); 
-// feature.setStyle(triangle); 
+
+//3.5***********Add a second feature */
+var markerCoords2 = [10.538269913664841, 52.25263461177347];
+var point2 = new ol.geom.Point(ol.proj.fromLonLat(markerCoords2));
+var feature2 = new ol.Feature({
+  geometry: point2
+});
+feature2.setId('Braunschweig HBF'); //giving feature an id
+feature2.setStyle(triangle); 
+
 
 //4. Create a source which houses the feature(s)
 myVectorSource = new ol.source.Vector({
-  features: [feature]
+  features: [feature, feature2]
 });
 
 //5. create a vector layer which uses that source
@@ -52,6 +61,11 @@ var myVectorLayer = new ol.layer.Vector({
 });
 
 //6. All left to do, is to add this vectorLayer to the list of layers for the map.
+
+
+
+
+
 
 
 var map = new ol.Map({
@@ -66,4 +80,11 @@ var map = new ol.Map({
       center: ol.proj.fromLonLat([6.783333, 51.233334]), //Dusseldorf, Germany
       zoom: 4
     })
+  });
+
+  map.on('click', function(evt){
+
+      map.forEachFeatureAtPixel(evt.pixel, function(feature, layer){
+        alert(feature.getId());
+      })
   });
