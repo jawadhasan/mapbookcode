@@ -5,11 +5,41 @@ var markerCoords = [6.861427,51.258013];//Location in Dusseldorf, Germany
 //2. Create a point geometry using coordinates
 var point = new ol.geom.Point(ol.proj.fromLonLat(markerCoords));
 
+//2.5 Create a style
+var stroke = new ol.style.Stroke({color:'black', width:2});
+var greenFill = new ol.style.Fill({color:'green'});
+
+//style = square shape
+var sequareStyle = new ol.style.Style({
+  image: new ol.style.RegularShape({
+      fill: greenFill,
+      stroke: stroke,
+      points: 4,
+      radius:10,
+      angle: Math.PI/4 //angle is in radian: so => for 45 degree rotation
+  })
+});
+
+//another example: style = triangle
+var triangle = new ol.style.Style({
+  image: new ol.style.RegularShape({
+    fill: greenFill,
+    stroke: stroke,
+    points: 3,
+    radius: 10,
+    rotation: Math.PI / 4,
+    angle: 0,
+  })
+});
+
+
 //3. Create a feature, whose geometry is that point.
 var feature = new ol.Feature({
   geometry: point
 });
 feature.setId('LuckemeyerStrasse'); //giving feature an id
+feature.setStyle(sequareStyle); 
+// feature.setStyle(triangle); 
 
 //4. Create a source which houses the feature(s)
 myVectorSource = new ol.source.Vector({
