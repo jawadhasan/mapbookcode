@@ -9,7 +9,7 @@ var point = new ol.geom.Point(ol.proj.fromLonLat(markerCoords));
 var feature = new ol.Feature({
   geometry: point
 });
-feature.setId('mylocation'); //giving feature an id
+feature.setId('LuckemeyerStrasse'); //giving feature an id
 
 //4. Create a source which houses the feature(s)
 myVectorSource = new ol.source.Vector({
@@ -20,7 +20,6 @@ myVectorSource = new ol.source.Vector({
 var myVectorLayer = new ol.layer.Vector({ 
   source: myVectorSource,
 });
-
 
 //6. All left to do, is to add this vectorLayer to the list of layers for the map.
 
