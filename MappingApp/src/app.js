@@ -78,24 +78,24 @@ var myVectorLayer = new ol.layer.Vector({
 //6. All left to do, is to add this vectorLayer to the list of layers for the map.
 
 //*********Create a line: Line is shortest distance between any two points**************
-// start with coordinates
+// 1. start with coordinates
 var points= [markerCoords,markerCoords2, berlinCoords];
 
-//transform
+//2. transform
 for (var i = 0; i < points.length; i++) {
   points[i] = ol.proj.transform(points[i], 'EPSG:4326', 'EPSG:3857');
 }
 
-//feature
+//3. create feature (LineString)
 var featureLine = new ol.Feature({
   geometry: new ol.geom.LineString(points)
 });
 
-//vector source
+//4. vector source
 var vectorLineSource = new ol.source.Vector({});
 vectorLineSource.addFeature(featureLine);
 
-//vector layer
+//6. vector layer
 var vectorLineLayer = new ol.layer.Vector({
   source: vectorLineSource,
     style: new ol.style.Style({
@@ -104,7 +104,7 @@ var vectorLineLayer = new ol.layer.Vector({
   })
 
 });
-//add vector layer to map
+//6. add vector layer to map
 //******************************************* */
 
 
@@ -115,8 +115,7 @@ var map = new ol.Map({
         source: new ol.source.OSM()
       }),
       myVectorLayer,
-      vectorLineLayer
-      
+      vectorLineLayer      
     ],
     view: new ol.View({
       center: ol.proj.fromLonLat([6.783333, 51.233334]), //Dusseldorf, Germany
