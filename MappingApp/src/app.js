@@ -50,9 +50,24 @@ feature2.setId('Braunschweig HBF'); //giving feature an id
 feature2.setStyle(triangle); 
 
 
+//**3.6****Add a third feature */
+
+//berlin coordinates
+var berlinCoords = [13.138977, 52.527610];
+
+//convert them to default projection
+var berlinPoint = ol.proj.transform(berlinCoords, 'EPSG:4326', 'EPSG:3857');
+
+var berlinPointFeature = new ol.Feature({
+  geometry: new ol.geom.Point([berlinPoint[0], berlinPoint[1]])
+});
+berlinPointFeature.setId('Berlin'); //giving feature an id
+berlinPointFeature.setStyle(sequareStyle); 
+
+
 //4. Create a source which houses the feature(s)
 myVectorSource = new ol.source.Vector({
-  features: [feature, feature2]
+  features: [feature, feature2, berlinPointFeature]
 });
 
 //5. create a vector layer which uses that source
@@ -62,10 +77,35 @@ var myVectorLayer = new ol.layer.Vector({
 
 //6. All left to do, is to add this vectorLayer to the list of layers for the map.
 
+//*********Create a line: Line is shortest distance between any two points**************
+// start with coordinates
+var points= [markerCoords,markerCoords2, berlinCoords];
 
+//transform
+for (var i = 0; i < points.length; i++) {
+  points[i] = ol.proj.transform(points[i], 'EPSG:4326', 'EPSG:3857');
+}
 
+//feature
+var featureLine = new ol.Feature({
+  geometry: new ol.geom.LineString(points)
+});
 
+//vector source
+var vectorLineSource = new ol.source.Vector({});
+vectorLineSource.addFeature(featureLine);
 
+//vector layer
+var vectorLineLayer = new ol.layer.Vector({
+  source: vectorLineSource,
+    style: new ol.style.Style({
+    fill: new ol.style.Fill({ color: '#00FF00', weight: 4 }),
+    stroke: new ol.style.Stroke({ color: '#00FF00', width: 2 })
+  })
+
+});
+//add vector layer to map
+//******************************************* */
 
 
 var map = new ol.Map({
@@ -74,7 +114,9 @@ var map = new ol.Map({
       new ol.layer.Tile({
         source: new ol.source.OSM()
       }),
-      myVectorLayer
+      myVectorLayer,
+      vectorLineLayer
+      
     ],
     view: new ol.View({
       center: ol.proj.fromLonLat([6.783333, 51.233334]), //Dusseldorf, Germany
