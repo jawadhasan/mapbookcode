@@ -8,44 +8,47 @@ var MapHandler = (function () {
         this.layerData = new LayerData(this.truckDataHandlerArray);
     }
 
-    MapHandler.prototype.loadTruckMapJsonData = function (json) {   
+    MapHandler.prototype.loadTruckMapJsonData = function (json) {
         for (var tr = 0; tr < json.data.length; tr++) {
             var truckJson = json.data[tr];
             var truckDataHandler = new TruckDataHandler(truckJson);
             this.truckDataHandlerArray.push(truckDataHandler);
         }
+        this.layerData.buildTruckTrackLayers();
         this.layerData.buildTruckMarkerLayers();
     };
-    
-   MapHandler.prototype.createMap = function () {  
 
-    var osmLayer = new ol.layer.Tile({
-       source: new ol.source.OSM()
-    });
-    // Create latitude and longitude and convert them to default projection
-    var berlin = ol.proj.transform([13.138977, 52.527610], 'EPSG:4326', 'EPSG:3857');
-    // Create a View, set it center and zoom level
-    var view = new ol.View({
-       center: berlin,
-       zoom: 6
-    });
-    // Instanciate a Map, set the object target to the map DOM id
-    this.map = new ol.Map({
-       target: 'myMap'
-    });
-    // Add the created layer to the Map
-    this.map.addLayer(osmLayer);  
- 
-     this.map.addLayer(this.layerData.truckTrackLayer);
-     this.map.addLayer(this.layerData.truckTrackMarkerLayer);
+    MapHandler.prototype.createMap = function () {
 
-     this.map.addLayer(this.layerData.truckPositionLayer);
-     this.map.addLayer(this.layerData.truckInformationMarkerLayer);
+        var osmLayer = new ol.layer.Tile({
+            source: new ol.source.OSM()
+        });
+        // Create latitude and longitude and convert them to default projection
+        var berlin = ol.proj.transform([13.138977, 52.527610], 'EPSG:4326', 'EPSG:3857');
+        // Create a View, set it center and zoom level
+        var view = new ol.View({
+            center: berlin,
+            zoom: 6
+        });
+        // Instanciate a Map, set the object target to the map DOM id
+        this.map = new ol.Map({
+            target: 'myMap'
+        });
+        // Add the created layer to the Map
+        this.map.addLayer(osmLayer);
 
-    // Set the view for the map
-    this.map.setView(view);  
- };
+        this.map.addLayer(this.layerData.truckTrackLayer);
+        this.map.addLayer(this.layerData.truckTrackMarkerLayer);
 
+        this.map.addLayer(this.layerData.truckPositionLayer);
+        this.map.addLayer(this.layerData.truckInformationMarkerLayer);
+
+        // Set the view for the map
+        this.map.setView(view);  
+
+    };
+
+   
     return MapHandler;
 
 })();
@@ -63,17 +66,38 @@ var LayerData = (function () {
         this.truckTrackMarkerLayer = new ol.layer.Vector();
     }
 
-    LayerData.prototype.buildTruckMarkerLayers = function () {   
+    LayerData.prototype.buildTruckTrackLayers = function (truckHandler) {
+        var trackMarkerVectorSource = new ol.source.Vector();
+        var trackLineVectorSource = new ol.source.Vector();
+        if (truckHandler) {
+            trackMarkerVectorSource.addFeatures(truckHandler.truckTrackMarkerFeatures);
+            trackLineVectorSource.addFeatures(truckHandler.truckTrackFeatures);
+        }
+        else {
+            for (var tr = 0; tr < this.truckDataHandlerArray.length; tr++) {
+                truckHandler = this.truckDataHandlerArray[tr];
+                trackMarkerVectorSource.addFeatures(truckHandler.truckTrackMarkerFeatures);
+                trackLineVectorSource.addFeatures(truckHandler.truckTrackFeatures);
+            }
+        }
+
+        this.truckTrackMarkerLayer.setSource(trackMarkerVectorSource);
+
+        this.truckTrackLayer.setSource(trackLineVectorSource);
+        this.truckTrackLayer.setStyle(this.getTruckLineStyleFunction);
+    };
+
+    LayerData.prototype.buildTruckMarkerLayers = function () {
         var truckPositionMarkerVectorSource = new ol.source.Vector();
         var truckInformationMarkerVectorSource = new ol.source.Vector();
 
         for (var tr = 0; tr < this.truckDataHandlerArray.length; tr++) {
-           var truckDataHandler = this.truckDataHandlerArray[tr];
-           truckPositionMarkerVectorSource.addFeature(truckDataHandler.truckPositionFeature);
-           truckInformationMarkerVectorSource.addFeature(truckDataHandler.truckInformationMarkerFeature);
+            var truckDataHandler = this.truckDataHandlerArray[tr];
+            truckPositionMarkerVectorSource.addFeature(truckDataHandler.truckPositionFeature);
+            truckInformationMarkerVectorSource.addFeature(truckDataHandler.truckInformationMarkerFeature);
         }
-  
-        this.truckPositionLayer.setSource(truckPositionMarkerVectorSource);  
+
+        this.truckPositionLayer.setSource(truckPositionMarkerVectorSource);
         this.truckInformationMarkerLayer.setSource(truckInformationMarkerVectorSource);
     };
 
@@ -113,9 +137,8 @@ var TruckDataHandler = (function () {
                 var dy = coordinates[1] - lastCoordinates[1];
                 var rotation = Math.atan2(dy, dx);
 
-                ////TODO: in next chapter
-                //this.truckTrackMarkerFeatures.push(this.createTruckTrackMarker(coordinates, rotation, pos.ts));
-                //this.truckTrackFeatures.push(this.createTruckTrackLine(lastCoordinates, coordinates));
+                this.truckTrackMarkerFeatures.push(this.createTruckTrackMarker(coordinates, rotation, pos.ts));
+                this.truckTrackFeatures.push(this.createTruckTrackLine(lastCoordinates, coordinates));
             }
             lastCoordinates = coordinates;
         }
@@ -123,6 +146,15 @@ var TruckDataHandler = (function () {
         this.truckInformationMarkerFeature = this.createTruckInformationMarker(coordinates, truckJson);
         this.currentPosition = lastCoordinates;
     };
+
+
+    TruckDataHandler.prototype.createTruckTrackLine = function (prevCoordinates, coordinates) {
+        return new ol.Feature({
+            geometry: new ol.geom.LineString([[prevCoordinates[0], prevCoordinates[1]], [coordinates[0], coordinates[1]]]),
+            type: 'tr',
+            registrationNumber: this.truckRegistrationNumber
+        });
+    }
 
     TruckDataHandler.prototype.createTruckPositionMarker = function (coordinates, rotation) {
         var inst = this;
@@ -168,6 +200,29 @@ var TruckDataHandler = (function () {
                 opacity: 1,
                 rotateWithView: false,
                 src: imagePath
+            }))
+        });
+
+        markerFeature.setStyle(iconStyle);
+        return markerFeature;
+    };
+
+    TruckDataHandler.prototype.createTruckTrackMarker = function (coordinates, rotation, timestamp, registrationNumber) {
+        var markerFeature = new ol.Feature({
+            geometry: new ol.geom.Point([coordinates[0], coordinates[1]]),
+            type: 'ts',
+            timestamp: timestamp,
+            registrationNumber: registrationNumber
+        });
+        var iconStyle = new ol.style.Style({
+            image: new ol.style.Icon(({
+                anchor: [8, 8],
+                anchorXUnits: 'pixels',
+                anchorYUnits: 'pixels',
+                opacity: 0.75,
+                rotateWithView: false,
+                rotation: -rotation,
+                src: './Images/arrow2.png'
             }))
         });
 
