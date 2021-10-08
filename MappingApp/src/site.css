@@ -3,3 +3,24 @@
     height: 600px;
     border: 1px solid #003;
 }
+
+
+#info {
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    z-index: 9900;
+ }
+
+ .tooltip.in {
+    opacity: 1;
+    filter: alpha(opacity=100);
+ }
+
+ .tooltip.top .tooltip-arrow {
+    border-top-color: white;
+ }
+
+ .tooltip-inner {
+    border: 2px solid white;
+ }
