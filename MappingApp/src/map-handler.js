@@ -219,13 +219,15 @@ var TruckDataHandler = (function () {
                 var dy = coordinates[1] - lastCoordinates[1];
                 var rotation = Math.atan2(dy, dx);
 
+                console.log(truckJson);
                 this.truckTrackMarkerFeatures.push(this.createTruckTrackMarker(coordinates, rotation, pos.ts));
+
                 this.truckTrackFeatures.push(this.createTruckTrackLine(lastCoordinates, coordinates));
             }
             lastCoordinates = coordinates;
         }
         this.truckPositionFeature = this.createTruckPositionMarker(coordinates, rotation);
-        this.truckInformationMarkerFeature = this.createTruckInformationMarker(coordinates, truckJson);
+        this.truckInformationMarkerFeature = this.createTruckInformationMarker(coordinates);
         this.currentPosition = lastCoordinates;
     };
 
@@ -252,14 +254,7 @@ var TruckDataHandler = (function () {
       this.currentPosition = coordinates;
    };
 
-    TruckDataHandler.prototype.createTruckTrackLine = function (prevCoordinates, coordinates) {
-        return new ol.Feature({
-            geometry: new ol.geom.LineString([[prevCoordinates[0], prevCoordinates[1]], [coordinates[0], coordinates[1]]]),
-            type: 'tr',
-            registrationNumber: this.truckRegistrationNumber
-        });
-    }
-
+ 
     TruckDataHandler.prototype.createTruckPositionMarker = function (coordinates, rotation) {
         var inst = this;
         var markerFeature = new ol.Feature({
@@ -311,6 +306,7 @@ var TruckDataHandler = (function () {
         return markerFeature;
     };
 
+
     TruckDataHandler.prototype.createTruckTrackMarker = function (coordinates, rotation, timestamp, registrationNumber) {
         var markerFeature = new ol.Feature({
             geometry: new ol.geom.Point([coordinates[0], coordinates[1]]),
@@ -333,6 +329,13 @@ var TruckDataHandler = (function () {
         markerFeature.setStyle(iconStyle);
         return markerFeature;
     };
+    TruckDataHandler.prototype.createTruckTrackLine = function (prevCoordinates, coordinates) {
+        return new ol.Feature({
+            geometry: new ol.geom.LineString([[prevCoordinates[0], prevCoordinates[1]], [coordinates[0], coordinates[1]]]),
+            type: 'tr',
+            registrationNumber: this.truckRegistrationNumber
+        });
+    }
 
 
     return TruckDataHandler;
