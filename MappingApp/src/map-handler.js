@@ -87,19 +87,16 @@ var MapHandler = (function () {
 
         if (feature) {
             var properties = feature.getProperties()
-            if (properties.type == "tr") {
-               console.log(properties);
+            if (properties.type == "tr") {              
                text = properties.registrationNumber;
             }
-            else if (properties.type == "ts") {
-               console.log("TS: " + properties.timestamp);
+            else if (properties.type == "ts") {             
                text = properties.timestamp;
             }
-            else if (properties.type == "po") {
-                console.log('po');
+            else if (properties.type == "po") {           
                 var truckDataHolder = this.findTruckById(properties.id);
                 this.layerData.buildTruckTrackLayers(truckDataHolder);
-                //text = properties.registrationNumber;
+                text = truckDataHolder.infotext;
              }          
          }      
 
@@ -218,8 +215,7 @@ var TruckDataHandler = (function () {
                 var dx = coordinates[0] - lastCoordinates[0];
                 var dy = coordinates[1] - lastCoordinates[1];
                 var rotation = Math.atan2(dy, dx);
-
-                console.log(truckJson);
+               
                 this.truckTrackMarkerFeatures.push(this.createTruckTrackMarker(coordinates, rotation, pos.ts));
 
                 this.truckTrackFeatures.push(this.createTruckTrackLine(lastCoordinates, coordinates));
@@ -291,28 +287,48 @@ var TruckDataHandler = (function () {
             type: 'ti',
         });
         var imagePath = './Images/numplate.png'; //replace with no-plate
-        var iconStyle = new ol.style.Style({
-            image: new ol.style.Icon(({
-                anchor: [0, 30],
-                anchorXUnits: 'pixels',
-                anchorYUnits: 'pixels',
-                opacity: 1,
-                rotateWithView: false,
-                src: imagePath
-            }))
-        });
+        // var iconStyle = new ol.style.Style({
+        //     image: new ol.style.Icon(({
+        //         anchor: [0, 30],
+        //         anchorXUnits: 'pixels',
+        //         anchorYUnits: 'pixels',
+        //         opacity: 1,
+        //         rotateWithView: false,
+        //         src: imagePath
+        //     }))
+        // });
+
+        iconStyle = [
+            new ol.style.Style({
+                image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+                    anchor: [0.5, 1],
+                    anchorXUnits: 'fraction',
+                    anchorYUnits: 'fraction',
+                    src: '/Images/marker-48.png',
+                }))
+            }),
+            new ol.style.Style({
+                text: new ol.style.Text({
+                    text: this.truckRegistrationNumber,
+                    offsetY: 25,
+                    scale:1.5,
+                    fill: new ol.style.Fill({
+                        color: '#ff0000'
+                    })
+                })
+            })
+        ];
 
         markerFeature.setStyle(iconStyle);
         return markerFeature;
     };
 
 
-    TruckDataHandler.prototype.createTruckTrackMarker = function (coordinates, rotation, timestamp, registrationNumber) {
+    TruckDataHandler.prototype.createTruckTrackMarker = function (coordinates, rotation, timestamp) {
         var markerFeature = new ol.Feature({
             geometry: new ol.geom.Point([coordinates[0], coordinates[1]]),
             type: 'ts',
-            timestamp: timestamp,
-            registrationNumber: registrationNumber
+            timestamp: timestamp           
         });
         var iconStyle = new ol.style.Style({
             image: new ol.style.Icon(({
