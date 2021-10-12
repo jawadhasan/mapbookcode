@@ -1,5 +1,6 @@
 ﻿using MappingAppBackend.BackendServer;
 using System;
+using System.Threading;
 
 namespace MappingAppBackend.ConsoleApp
 {
@@ -10,15 +11,53 @@ namespace MappingAppBackend.ConsoleApp
 
             Console.WriteLine("ConsoleApp");
 
-            var testMqttClient = new TestMqttClient();
-            testMqttClient.Start();
+            //serverManager
+            var serverManasger = new ServerManager();
+            serverManasger.Start();
 
-            Console.WriteLine("Press key to stop the testMqttClient");
-            
+            //TestclientHandler
+            var clientHandler = new ClientHandler(
+                ServerConfigs._brokerUri,
+                Guid.NewGuid().ToString("N"),
+                Guid.NewGuid().ToString("N"),
+                "clientHandler-1");
+            clientHandler.Connect();
+
+            //TruckClietHandler //TODO: Should be specialized
+            var truckClientHandler1 = new ClientHandler(
+                ServerConfigs._brokerUri,
+                Guid.NewGuid().ToString("N"),
+                Guid.NewGuid().ToString("N"),
+                "tuckHandler-1");
+            truckClientHandler1.Connect();
+
+
+            //WebApiClientHandler
+            var webApiClientHandler = new ClientHandler(
+                ServerConfigs._brokerUri,
+                Guid.NewGuid().ToString("N"),
+                Guid.NewGuid().ToString("N"),
+                "webApiHandler");
+            webApiClientHandler.Connect();
+
+            //var clientMessage = new ClientMessage
+            //{
+            //    ClientId = "webApiHandler",
+            //    ClientReturnGuid = WebApiClientHandler.ListeningGuid                 
+            //};
+
+            Console.WriteLine("Sending Message to Server");
+            var simpleMessage = webApiClientHandler.BuildMqttMessage("test is test from webApiClientHandler", ServerConfigs._brokerBackendConnectAddress);
+            webApiClientHandler.ClientHandlerMqttClient.Client.PublishAsync(simpleMessage, CancellationToken.None);
+
+
+            serverManasger.DisplayServerManagerInfo();
+
+            Console.WriteLine("Close ConsoleApp [Press Key]");
             Console.ReadLine();
-            testMqttClient.Stop();
+            serverManasger.Stop();
 
-            Console.WriteLine("Press key to exit the ConsoleApp");
+
             Console.ReadLine();
         }
     }
