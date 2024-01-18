@@ -6,10 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="MQTTnet" Version="3.0.16" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\MqttCommon\MqttCommon.csproj" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
 </Project>

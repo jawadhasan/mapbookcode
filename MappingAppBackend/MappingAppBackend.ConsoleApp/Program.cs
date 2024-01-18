@@ -1,4 +1,5 @@
 ﻿using MappingAppBackend.BackendServer;
+using MqttCommon;
 using System;
 using System.Threading;
 
@@ -47,7 +48,7 @@ namespace MappingAppBackend.ConsoleApp
             //};
 
             Console.WriteLine("Sending Message to Server");
-            var simpleMessage = webApiClientHandler.BuildMqttMessage("test is test from webApiClientHandler", ServerConfigs._brokerBackendConnectAddress);
+            var simpleMessage = webApiClientHandler.BuildMqttMessage("test is test from webApiClientHandler", ServerConfigs._backendConnectAddress);
             webApiClientHandler.ClientHandlerMqttClient.Client.PublishAsync(simpleMessage, CancellationToken.None);
 
 

@@ -1,4 +1,5 @@
-﻿using MQTTnet;
+﻿using MqttCommon;
+using MQTTnet;
 using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Receiving;
@@ -32,7 +33,7 @@ namespace MappingAppBackend.BackendServer
 
         private void ConnectBackendServerAddress()
         {
-            _serverHandler = new ServerHandler(ServerConfigs._brokerUri, ServerConfigs._brokerBackendConnectAddress);
+            _serverHandler = new ServerHandler(ServerConfigs._brokerUri, ServerConfigs._backendConnectAddress);
 
             _serverHandler.ServerHandlerMqttClient.Client.ConnectedHandler = new MqttClientConnectedHandlerDelegate(OnConnected);
             _serverHandler.ServerHandlerMqttClient.Client.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(OnMsgReceived);
